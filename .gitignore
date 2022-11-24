@@ -10,3 +10,5 @@ data/datasets/*
 !data/datasets/Yelp/README.md
 !data/datasets/DBpedia/README.md
 models/*
+.ipynb_checkpoints/
+.idea/

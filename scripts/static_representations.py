@@ -178,7 +178,8 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("--dataset_name", type=str, required=True)
     parser.add_argument("--random_state", type=int, default=42)
-    parser.add_argument("--lm_type", type=str, default='bbu')
+    parser.add_argument("--lm_type", type=str, default='bbu',
+                        description='bbu: BERT-based uncased. If set, both keywords and text will be lower-cased.')
     parser.add_argument("--vocab_min_occurrence", type=int, default=5)
     # last layer of BERT
     parser.add_argument("--layer", type=int, default=12)

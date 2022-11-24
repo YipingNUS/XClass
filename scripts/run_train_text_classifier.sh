@@ -8,7 +8,7 @@ model_name_or_path=bert-base-cased
 # this is also defined in utils.py, make sure to change both when changing.
 output_dir=../models/${model_name_or_path}_${train_suffix}
 
-CUDA_VISIBLE_DEVICES=$GPU python train_text_classifier.py \
+CUDA_VISIBLE_DEVICES=$GPU python3 train_text_classifier.py \
   --model_name_or_path ${model_name_or_path} \
   --task_name ${dataset_name} \
   --train_suffix ${train_suffix} \
