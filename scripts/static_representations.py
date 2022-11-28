@@ -1,7 +1,8 @@
 import argparse
+from collections import Counter, defaultdict
 import os
 import pickle as pk
-from collections import defaultdict
+import string
 
 import numpy as np
 import torch
@@ -9,6 +10,10 @@ from tqdm import tqdm
 
 from preprocessing_utils import load
 from utils import INTERMEDIATE_DATA_FOLDER_PATH, MODELS, tensor_to_numpy
+
+use_cuda = False
+if torch.cuda.is_available():
+    use_cuda = True
 
 
 def prepare_sentence(tokenizer, text):
@@ -25,28 +30,28 @@ def prepare_sentence(tokenizer, text):
         prepare_sentence.sos_id, prepare_sentence.eos_id = tokenizer.encode("", add_special_tokens=True)
         print(prepare_sentence.sos_id, prepare_sentence.eos_id)
 
+    # Yiping: basic_tokenizer does white space tokenization with some customization
     tokenized_text = tokenizer.basic_tokenizer.tokenize(text, never_split=tokenizer.all_special_tokens)
-    tokenized_to_id_indicies = []
-
-    tokenids_chunks = []
-    tokenids_chunk = []
+    tokenized_to_id_indices = []
+    token_id_chunks = []
+    token_id_chunk = []
 
     for index, token in enumerate(tokenized_text + [None]):
         if token is not None:
             tokens = tokenizer.wordpiece_tokenizer.tokenize(token)
-        if token is None or len(tokenids_chunk) + len(tokens) > max_tokens:
-            tokenids_chunks.append([prepare_sentence.sos_id] + tokenids_chunk + [prepare_sentence.eos_id])
+        if token is None or len(token_id_chunk) + len(tokens) > max_tokens:
+            token_id_chunks.append([prepare_sentence.sos_id] + token_id_chunk + [prepare_sentence.eos_id])
             if sliding_window_size > 0:
-                tokenids_chunk = tokenids_chunk[-sliding_window_size:]
+                token_id_chunk = token_id_chunk[-sliding_window_size:]
             else:
-                tokenids_chunk = []
+                token_id_chunk = []
         if token is not None:
-            tokenized_to_id_indicies.append((len(tokenids_chunks),
-                                             len(tokenids_chunk),
-                                             len(tokenids_chunk) + len(tokens)))
-            tokenids_chunk.extend(tokenizer.convert_tokens_to_ids(tokens))
+            tokenized_to_id_indices.append((len(token_id_chunks),
+                                            len(token_id_chunk),
+                                            len(token_id_chunk) + len(tokens)))
+            token_id_chunk.extend(tokenizer.convert_tokens_to_ids(tokens))
 
-    return tokenized_text, tokenized_to_id_indicies, tokenids_chunks
+    return tokenized_text, tokenized_to_id_indices, token_id_chunks
 
 
 def sentence_encode(tokens_id, model, layer):
@@ -121,44 +126,38 @@ def main(args):
     tokenizer = tokenizer_class.from_pretrained(pretrained_weights)
     model = model_class.from_pretrained(pretrained_weights, output_hidden_states=True)
     model.eval()
-    model.cuda()
+    if use_cuda:
+        model.cuda()
 
-    tokenization_info = []
-    import re
-    from collections import Counter
     counts = Counter()
-    import string
-
     for text in tqdm(data):
-        tokenized_text, tokenized_to_id_indicies, tokenids_chunks = prepare_sentence(tokenizer, text)
-        counts.update(word.translate(str.maketrans('','',string.punctuation)) for word in tokenized_text)
-        
+        tokenized_text, tokenized_to_id_indices, token_ids_chunks = prepare_sentence(tokenizer, text)
+        counts.update(word.translate(str.maketrans('', '', string.punctuation)) for word in tokenized_text)
     del counts['']
-    updated_counts = {k: c for k, c in counts.items() if c >= args.vocab_min_occurrence}
-    word_rep = {}
-    word_count = {}
 
+    updated_counts = {k: c for k, c in counts.items() if c >= args.vocab_min_occurrence}
+
+    word_rep = defaultdict(float)
+    word_count = defaultdict(int)
+    tokenization_info = []
     for text in tqdm(data):
-        tokenized_text, tokenized_to_id_indicies, tokenids_chunks = prepare_sentence(tokenizer, text)
-        tokenization_info.append((tokenized_text, tokenized_to_id_indicies, tokenids_chunks))
+        tokenized_text, tokenized_to_id_indices, token_ids_chunks = prepare_sentence(tokenizer, text)
+        tokenization_info.append((tokenized_text, tokenized_to_id_indices, token_ids_chunks))
         contextualized_word_representations = handle_sentence(model, args.layer, tokenized_text,
-                                         tokenized_to_id_indicies, tokenids_chunks)
+                                                              tokenized_to_id_indices, token_ids_chunks)
         for i in range(len(tokenized_text)):
-          word = tokenized_text[i]
-          if word in updated_counts.keys():
-            if word not in word_rep:
-              word_rep[word] = 0
-              word_count[word] = 0
-            word_rep[word] += contextualized_word_representations[i]
-            word_count[word] += 1
-        
+            word = tokenized_text[i]
+            if word in updated_counts.keys():
+                word_rep[word] += contextualized_word_representations[i]
+                word_count[word] += 1
+
     word_avg = {}
-    for k,v in word_rep.items():
-      word_avg[k] = word_rep[k]/word_count[k]
-    
+    for k, v in word_rep.items():
+        word_avg[k] = word_rep[k] / word_count[k]
+
     vocab_words = list(word_avg.keys())
-    static_word_representations = list(word_avg.values())
-    vocab_occurrence = list(word_count.values()) 
+    static_word_representations = [word_avg[word] for word in vocab_words]
+    vocab_occurrence = [word_count[word] for word in vocab_words]
 
     with open(os.path.join(data_folder, f"tokenization_lm-{args.lm_type}-{args.layer}.pk"), "wb") as f:
         pk.dump({
@@ -179,7 +178,7 @@ if __name__ == '__main__':
     parser.add_argument("--dataset_name", type=str, required=True)
     parser.add_argument("--random_state", type=int, default=42)
     parser.add_argument("--lm_type", type=str, default='bbu',
-                        description='bbu: BERT-based uncased. If set, both keywords and text will be lower-cased.')
+                        help='bbu: BERT-based uncased. If set, both keywords and text will be lower-cased.')
     parser.add_argument("--vocab_min_occurrence", type=int, default=5)
     # last layer of BERT
     parser.add_argument("--layer", type=int, default=12)

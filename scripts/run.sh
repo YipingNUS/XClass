@@ -1,3 +1,5 @@
+export PYTHONIOENCODING=utf8
+
 set -e
 
 gpu=$1

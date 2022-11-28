@@ -1,12 +1,14 @@
 import argparse
 import os
 import pickle as pk
-from collections import defaultdict
 
 import numpy as np
 import torch
+use_cuda = False
+if torch.cuda.is_available():
+    use_cuda = True
+
 from scipy.special import softmax
-from scipy.stats import entropy
 from tqdm import tqdm
 
 from static_representations import handle_sentence
@@ -40,6 +42,9 @@ def mul(l):
 
 
 def average_with_harmonic_series(representations):
+    """ Calculate the class representation as weighted embeddings of the keywords.
+        Eq. (2)
+    """
     weights = [0.0] * len(representations)
     for i in range(len(representations)):
         weights[i] = 1. / (i + 1)
@@ -47,6 +52,9 @@ def average_with_harmonic_series(representations):
 
 
 def weights_from_ranking(rankings):
+    """ Compute each word's attention weights by the ranking
+        Eq. (3)
+    """
     if len(rankings) == 0:
         assert False
     if type(rankings[0]) == type(0):
@@ -179,7 +187,9 @@ def main(args):
                     if word in existing_class_words:
                         stop_criterion = True
                         break
+
             # the topmost t words are no longer the t words in class_words
+            # Yiping: this is the consistency check mentioned in the paper
             if lowest_masked_words_similarity < highest_similarity:
                 stop_criterion = True
 
@@ -201,7 +211,8 @@ def main(args):
     model_class, tokenizer_class, pretrained_weights = MODELS[args.lm_type]
     model = model_class.from_pretrained(pretrained_weights, output_hidden_states=True)
     model.eval()
-    model.cuda()
+    if use_cuda:
+        model.cuda()
     document_representations = []
     for i, _tokenization_info in tqdm(enumerate(tokenization_info), total=len(tokenization_info)):
         document_representation = weight_sentence(model,
