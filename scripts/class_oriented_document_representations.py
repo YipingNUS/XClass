@@ -198,7 +198,6 @@ def main(args):
                 class_words[cls] = class_words[cls][:-1]
                 class_words_representations[cls] = class_words_representations[cls][:-1]
                 cls_repr[cls] = average_with_harmonic_series(class_words_representations[cls])
-                print(class_words[cls])
                 break
             class_words[cls].append(vocab_words[highest_similarity_word_index])
             class_words_representations[cls].append(static_word_representations[highest_similarity_word_index])
@@ -206,7 +205,12 @@ def main(args):
             cls_repr[cls] = average_with_harmonic_series(class_words_representations[cls])
         if len(finished_class) == len(class_names):
             break
-            
+
+    for expanded_keywords in class_words:
+        print(f"CATEGORY: {expanded_keywords[0]}")
+        print(", ".join(expanded_keywords))
+        print("")
+
     class_representations = np.array(cls_repr)
     model_class, tokenizer_class, pretrained_weights = MODELS[args.lm_type]
     model = model_class.from_pretrained(pretrained_weights, output_hidden_states=True)
