@@ -90,7 +90,8 @@ def weight_sentence_with_attention(vocab, tokenized_text, contextualized_word_re
             contextualized_representations.append(contextualized_word_representations[i])
     if len(contextualized_representations) == 0:
         print("Empty Sentence (or sentence with no words that have enough frequency)")
-        return np.average(contextualized_word_representations, axis=0)
+        # return np.average(contextualized_word_representations, axis=0)
+        return None
 
     significance_ranking = rank_by_significance(contextualized_representations, class_representations)
     relation_ranking = rank_by_relation(contextualized_representations, class_representations)
@@ -221,7 +222,10 @@ def main(args):
                                                   class_representations,
                                                   args.attention_mechanism,
                                                   args.layer)
-        document_representations.append(document_representation)
+        if document_representation:
+            document_representations.append(document_representation)
+        else:
+            print("[WARNING] Ignoring sentence with empty tokens.")
     document_representations = np.array(document_representations)
     print("Finish getting document representations")
     with open(os.path.join(data_folder,

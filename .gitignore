@@ -12,3 +12,5 @@ data/datasets/*
 models/*
 .ipynb_checkpoints/
 .idea/
+.DS_Store
+data/.DS_Store
