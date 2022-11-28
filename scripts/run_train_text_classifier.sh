@@ -16,10 +16,11 @@ CUDA_VISIBLE_DEVICES=$GPU python3 train_text_classifier.py \
   --output_dir ${output_dir} \
   --do_train \
   --do_eval \
+  --fp16 \
   --evaluate_during_training \
   --learning_rate 5e-5 \
   --num_train_epochs 3.0 \
-  --max_seq_length 512 \
+  --max_seq_length 64 \
   --per_gpu_train_batch_size 32 \
   --per_gpu_eval_batch_size 32 \
   --logging_steps 100000 \

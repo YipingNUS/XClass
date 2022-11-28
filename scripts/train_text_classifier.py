@@ -468,7 +468,7 @@ def main():
     )
     parser.add_argument(
         "--max_seq_length",
-        default=128,
+        default=64,
         type=int,
         help="The maximum total input sequence length after tokenization. Sequences longer "
              "than this will be truncated, sequences shorter will be padded.",
@@ -526,6 +526,7 @@ def main():
     parser.add_argument(
         "--fp16",
         action="store_true",
+        default=True,
         help="Whether to use 16-bit (mixed) precision (through NVIDIA apex) instead of 32-bit",
     )
     parser.add_argument(
