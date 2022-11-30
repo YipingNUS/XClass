@@ -1,49 +1,31 @@
 import argparse
-import json
-import math
 import os
 import pickle as pk
-import random
-import re
 
 import numpy as np
-import scipy.stats
-from scipy import linalg
 from sklearn.cluster import KMeans
 from sklearn.decomposition import PCA
 from sklearn.mixture import GaussianMixture
-from sklearn.mixture._gaussian_mixture import _estimate_gaussian_parameters
-from sklearn.preprocessing import normalize
-from tqdm import tqdm
 
-from utils import (INTERMEDIATE_DATA_FOLDER_PATH, cosine_similarity_embedding,
-                   cosine_similarity_embeddings, evaluate_predictions,
-                   most_common, pairwise_distances)
+from utils import INTERMEDIATE_DATA_FOLDER_PATH, cosine_similarity_embeddings
 
 
-def main(dataset_name,
-         pca,
-         cluster_method,
-         lm_type,
-         document_repr_type,
-         random_state):
-    save_dict_data = {}
+def main(dataset_name, pca, cluster_method, lm_type, document_repr_type, random_state):
+    # pca <= 0 means no pca
+    do_pca = pca > 0
 
-    # pca = 0 means no pca
-    do_pca = pca != 0
-
-    save_dict_data["dataset_name"] = dataset_name
-    save_dict_data["pca"] = pca
-    save_dict_data["cluster_method"] = cluster_method
-    save_dict_data["lm_type"] = lm_type
-    save_dict_data["document_repr_type"] = document_repr_type
-    save_dict_data["random_state"] = random_state
+    save_dict_data = {"dataset_name": dataset_name,
+                      "pca": pca,
+                      "cluster_method": cluster_method,
+                      "lm_type": lm_type,
+                      "document_repr_type": document_repr_type,
+                      "random_state": random_state}
 
     naming_suffix = f"pca{pca}.clus{cluster_method}.{lm_type}.{document_repr_type}.{random_state}"
-    print(naming_suffix)
+    print(f"naming_suffix: {naming_suffix}")
 
     data_dir = os.path.join(INTERMEDIATE_DATA_FOLDER_PATH, dataset_name)
-    print(data_dir)
+    print(f"data_dir: {data_dir}")
 
     with open(os.path.join(data_dir, "dataset.pk"), "rb") as f:
         dictionary = pk.load(f)
@@ -60,9 +42,11 @@ def main(dataset_name,
         save_dict_data["repr_prediction"] = repr_prediction
 
     if do_pca:
+        print(f"Before fitting PCA. document_representations {document_representations.shape}; class_representations {class_representations.shape}")
         _pca = PCA(n_components=pca, random_state=random_state)
         document_representations = _pca.fit_transform(document_representations)
         class_representations = _pca.transform(class_representations)
+        print(f"After fitting PCA. document_representations {document_representations.shape}; class_representations {class_representations.shape}")
         print(f"Explained variance: {sum(_pca.explained_variance_ratio_)}")
 
     if cluster_method == 'gmm':
