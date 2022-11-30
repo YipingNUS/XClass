@@ -3,18 +3,17 @@ import os
 import pickle as pk
 
 import numpy as np
-import torch
-use_cuda = False
-if torch.cuda.is_available():
-    use_cuda = True
 
 from scipy.special import softmax
 from tqdm import tqdm
 
 from static_representations import handle_sentence
-from utils import (INTERMEDIATE_DATA_FOLDER_PATH, MODELS,
-                   cosine_similarity_embedding, cosine_similarity_embeddings,
-                   evaluate_predictions, tensor_to_numpy)
+from utils import (INTERMEDIATE_DATA_FOLDER_PATH, MODELS, cosine_similarity_embeddings)
+
+import torch
+use_cuda = False
+if torch.cuda.is_available():
+    use_cuda = True
 
 
 def probability_confidence(prob):

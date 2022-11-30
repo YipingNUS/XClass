@@ -85,6 +85,7 @@ def main(dataset_name, pca, cluster_method, lm_type, document_repr_type, random_
     save_dict_data["distance"] = distance
 
     with open(os.path.join(data_dir, f"data.{naming_suffix}.pk"), "wb") as f:
+        print(f"Saving class-aligned documents to {data_dir}/data.{naming_suffix}.pk")
         pk.dump(save_dict_data, f)
 
 

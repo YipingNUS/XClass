@@ -52,6 +52,13 @@ specific dataset's folder.
 We used python=3.6, torch-1.4.0, cudatoolkit=10.0. 
 Other packages can be installed via `pip install -r requirements.txt`.
 
+##### Setting up env in Paperspace Gradient
+The easiest way to run the code on a GPU is to use [Paperspace Gradient](https://console.paperspace.com/) free GPUs. Below are the steps
+
+1. Choose the old P5000 GPU (or P4000 if you have a free account). Not the newer A4000 since it requires CUDA 11+ which conflicts with the code (CUDA 10)
+2. Create a notebook with advanced options, selecting the [legacy Transformers image](https://hub.docker.com/r/paperspace/transformers-gpu/tags) (0.4.0)
+3. Run `pip3 install -r requirements.txt` (you may have to run it every time you restart the machine as the dependencies aren't saved).
+
 #### Reproduce
 1. Follow the guidance in `data/datasets` and download the specific dataset.
 2. Create an environment, and make sure there is a gpu available. For the final BERT text classifer training step, 

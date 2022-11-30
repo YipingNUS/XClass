@@ -11,7 +11,7 @@ np.set_printoptions(precision=3, suppress=True)
 from collections import Counter
 
 from scipy.spatial.distance import cdist
-from sklearn.metrics import confusion_matrix, f1_score
+from sklearn.metrics import confusion_matrix, f1_score, classification_report
 from transformers import BertModel, BertTokenizer
 
 MODELS = {
@@ -51,16 +51,17 @@ def most_common(L):
     return c.most_common(1)[0][0]
 
 
-def evaluate_predictions(true_class, predicted_class, output_to_console=True, return_tuple=False):
+def evaluate_predictions(true_class, predicted_class, output_to_console=True, return_tuple=False, target_names=None):
     confusion = confusion_matrix(true_class, predicted_class)
     if output_to_console:
-        print("-" * 80 + "Evaluating" + "-" * 80)
+        print("-" * 20 + "Evaluating" + "-" * 20)
         print(confusion)
     f1_macro = f1_score(true_class, predicted_class, average='macro')
     f1_micro = f1_score(true_class, predicted_class, average='micro')
     if output_to_console:
         print("F1 macro: " + str(f1_macro))
         print("F1 micro: " + str(f1_micro))
+        print(classification_report(true_class, predicted_class, target_names=target_names))
     if return_tuple:
         return confusion, f1_macro, f1_micro
     else:
