@@ -23,7 +23,7 @@ echo "EXECUTING: prepare_text_classifer_training.py"
 python3 prepare_text_classifer_training.py --dataset_name ${dataset} --suffix pca64.clusgmm.bbu-12.mixture-100.42
 
 echo "EXECUTING: run_train_text_classifier.sh"
-./run_train_text_classifier.sh ${gpu} ${dataset} pca160.clusgmm.bbu-12.mixture-100.42.0.5
+./run_train_text_classifier.sh ${gpu} ${dataset} pca64.clusgmm.bbu-12.mixture-100.42.0.5
 
 echo "EXECUTING: evaluate.py --stage Rep --suffix bbu-12-mixture-100"
 python3 evaluate.py --dataset ${dataset} --stage Rep --suffix bbu-12-mixture-100

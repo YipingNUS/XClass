@@ -1,3 +1,7 @@
+""" Select the most confident examples for each category using a distance threshold.
+    The (raw) data of selected documents and labels is written to a separate folder.
+"""
+
 import argparse
 import itertools
 import json
@@ -39,6 +43,7 @@ def main(dataset_name, suffix, confidence_threshold):
     cleaned_text = load_clean_text(os.path.join(DATA_FOLDER_PATH, dataset_name))
     target_names = load_classnames(os.path.join(DATA_FOLDER_PATH, dataset_name))
 
+    print(f"[INFO] Loading data from {data_dir}/data.{suffix}.pk")
     with open(os.path.join(data_dir, f"data.{suffix}.pk"), "rb") as f:
         save_data = pickle.load(f)
         documents_to_class = save_data["documents_to_class"]
@@ -73,7 +78,7 @@ def main(dataset_name, suffix, confidence_threshold):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument("--dataset_name", default="agnews")
+    parser.add_argument("--dataset_name", type=str)
     parser.add_argument("--suffix", type=str, default="pca64.clusgmm.bbu-12.mixture-100.42")
     parser.add_argument("--confidence_threshold", default=0.5)
     args = parser.parse_args()

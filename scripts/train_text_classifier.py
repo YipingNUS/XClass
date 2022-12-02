@@ -355,12 +355,13 @@ def evaluate(args, model, tokenizer, prefix=""):
 
 def load_and_cache_examples(args, task, tokenizer, evaluate=False):
     if args.local_rank not in [-1, 0] and not evaluate:
-        torch.distributed.barrier()  # Make sure only the first process in distributed training process the dataset, and the others will use the cache
+        # Only the first process in distributed training processes the dataset, and the others will use the cache
+        torch.distributed.barrier()
 
     processor = processors[task](task=task, train_suffix=args.train_suffix, test_suffix=args.test_suffix)
     output_mode = output_modes[task]
-    # Load data features from cache or dataset file
 
+    # Load data features from cache or dataset file
     train_dir = f"{task}_{args.train_suffix}" if args.train_suffix is not None and args.train_suffix != "" else task
     test_dir = f"{task}_{args.test_suffix}" if args.test_suffix is not None and args.test_suffix != "" else task
 
@@ -391,7 +392,8 @@ def load_and_cache_examples(args, task, tokenizer, evaluate=False):
             torch.save(features, cached_features_file)
 
     if args.local_rank == 0 and not evaluate:
-        torch.distributed.barrier()  # Make sure only the first process in distributed training process the dataset, and the others will use the cache
+        # Only the first process in distributed training process the dataset, and the others will use the cache
+        torch.distributed.barrier()
 
     # Convert to Tensors and build dataset
     all_input_ids = torch.tensor([f.input_ids for f in features], dtype=torch.long)
@@ -652,7 +654,7 @@ def main():
 
         # Load a trained model and vocabulary that you have fine-tuned
         model = AutoModelForSequenceClassification.from_pretrained(args.output_dir)
-        tokenizer = AutoTokenizer.from_pretrained(args.output_dir)
+        tokenizer = AutoTokenizer.from_pretrained(args.model_name_or_path)
         model.to(args.device)
 
     # Evaluation
