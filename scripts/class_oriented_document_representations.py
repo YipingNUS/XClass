@@ -88,7 +88,7 @@ def weight_sentence_with_attention(vocab, tokenized_text, contextualized_word_re
             static_representations.append(static_word_representations[word_to_index[token]])
             contextualized_representations.append(contextualized_word_representations[i])
     if len(contextualized_representations) == 0:
-        print("Empty Sentence (or sentence with no words that have enough frequency)")
+        print(f"Empty Sentence (or sentence with no words that have enough frequency)\n {tokenized_text}")
         return np.average(contextualized_word_representations, axis=0)
 
     significance_ranking = rank_by_significance(contextualized_representations, class_representations)

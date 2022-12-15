@@ -86,17 +86,19 @@ def text_statistics(text, name="default"):
     print(f"#######################################")
 
 
-def load(dataset_name):
+def load(dataset_name, built_in_clean_text=False):
     data_dir = os.path.join(DATA_FOLDER_PATH, dataset_name)
     text = load_text(data_dir)
     class_names = load_classnames(data_dir)
     text = [s.strip() for s in text]
     text_statistics(text, "raw_txt")
 
-    cleaned_text = [clean_str(doc) for doc in text]
-    print(f"Cleaned {len(clean_html.clean_links)} html links")
-    text_statistics(cleaned_text, "cleaned_txt")
-
+    if built_in_clean_text:
+        cleaned_text = [clean_str(doc) for doc in text]
+        print(f"Cleaned {len(clean_html.clean_links)} html links")
+        text_statistics(cleaned_text, "cleaned_txt")
+    else:
+        cleaned_text = text
     result = {
         "class_names": class_names,
         "raw_text": text,
