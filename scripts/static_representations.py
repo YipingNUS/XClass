@@ -32,6 +32,8 @@ def prepare_sentence(tokenizer, text):
 
     # Yiping: basic_tokenizer does white space tokenization with some customization
     tokenized_text = tokenizer.basic_tokenizer.tokenize(text, never_split=tokenizer.all_special_tokens)
+    if len(tokenized_text) < 2:
+        print(f"[WARNING] Sentence too short!! {text}")
     tokenized_to_id_indices = []
     token_id_chunks = []
     token_id_chunk = []
