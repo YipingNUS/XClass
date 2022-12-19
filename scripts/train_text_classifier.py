@@ -181,24 +181,12 @@ def train(args, train_dataset, model, tokenizer):
     global_step = 0
     epochs_trained = 0
     steps_trained_in_current_epoch = 0
-    # Check if continuing training from a checkpoint
-    # if os.path.exists(args.model_name_or_path):
-    #     # set global_step to gobal_step of last saved checkpoint from model path
-    #     global_step = int(args.model_name_or_path.split("-")[-1].split("/")[0])
-    #     epochs_trained = global_step // (len(train_dataloader) // args.gradient_accumulation_steps)
-    #     steps_trained_in_current_epoch = global_step % (len(train_dataloader) // args.gradient_accumulation_steps)
-    #
-    #     logger.info("  Continuing training from checkpoint, will skip to saved global_step")
-    #     logger.info("  Continuing training from epoch %d", epochs_trained)
-    #     logger.info("  Continuing training from global step %d", global_step)
-    #     logger.info("  Will skip the first %d steps in the first epoch", steps_trained_in_current_epoch)
-
     tr_loss, logging_loss = 0.0, 0.0
     model.zero_grad()
     train_iterator = trange(
         epochs_trained, int(args.num_train_epochs), desc="Epoch", disable=args.local_rank not in [-1, 0]
     )
-    set_seed(args)  # Added here for reproductibility
+    set_seed(args)  # Added here for reproducibility
     for _ in train_iterator:
         epoch_iterator = tqdm(train_dataloader, desc="Iteration", disable=args.local_rank not in [-1, 0])
         for step, batch in enumerate(epoch_iterator):
@@ -626,7 +614,7 @@ def main():
     )
 
     if args.local_rank == 0:
-        torch.distributed.barrier()  # Make sure only the first process in distributed training will download model & vocab
+        torch.distributed.barrier()  # Ensure only the first process in distributed training will download model & vocab
 
     model.to(args.device)
 
