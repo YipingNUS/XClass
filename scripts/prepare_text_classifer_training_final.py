@@ -46,7 +46,7 @@ def main(dataset_name, suffix, confidence_threshold, input_path, output_path, ou
 
     input_path = Path(input_path)/f"{dataset_name}_{suffix}.{confidence_threshold}"
     texts, labels = load_dataset(input_path=input_path)
-    df = pd.DataFrame({raw_col: [""]*len(texts), input_col: texts, target_col: labels})
+    df = pd.DataFrame({raw_col: ["dummy"]*len(texts), input_col: texts, target_col: labels})
     df.to_csv(str(p_out/output_file), index=False)
 
 
