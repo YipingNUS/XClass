@@ -14,7 +14,7 @@ def load_dataset(input_path):
     print(id2label)
 
     with open(input_path/"dataset.txt", "r") as f:
-        texts = [t.strip() for t in f.readlines()]
+        texts = [str(t.strip()) for t in f.readlines()]
 
     with open(input_path/"labels.txt", "r") as f:
         labels = [id2label[l.strip()] for l in f.readlines()]
@@ -25,23 +25,28 @@ def load_dataset(input_path):
 
 def main(dataset_name, suffix, confidence_threshold, input_path, output_path, output_file):
     input_col = "preprocessed_text"
-    if dataset_name == "sbic":
-        label2id = {"women": 0, "black": 1, "victims": 2, "jewish": 3,
-                    "disabled": 4}
+    if dataset_name == "sbic" or dataset_name == "sbic-fine-grained":
         target_col = "targetMinority"
         raw_col = "post"
         p_out = Path(output_path)/dataset_name
     elif dataset_name == "waseem":
-        label2id = {"racist": 0, "sexist": 1}
         target_col = "label"
         raw_col = "text"
         p_out = Path(output_path)/"waseem_dataset/share"
+    elif dataset_name == "waseem-sbic-cross-domain":
+        target_col = "label"
+        raw_col = "text"
+        p_out = Path(output_path)/dataset_name
+    elif dataset_name == "sbic-waseem-cross-domain":
+        target_col = "label"
+        raw_col = "text"
+        p_out = Path(output_path)/dataset_name
     else:
         raise Exception(f"Unknown dataset: {dataset_name}.")
 
     input_path = Path(input_path)/f"{dataset_name}_{suffix}.{confidence_threshold}"
     texts, labels = load_dataset(input_path=input_path)
-    df = pd.DataFrame({raw_col: ["-"]*len(texts), input_col: texts, target_col: labels})
+    df = pd.DataFrame({raw_col: [""]*len(texts), input_col: texts, target_col: labels})
     df.to_csv(str(p_out/output_file), index=False)
 
 
