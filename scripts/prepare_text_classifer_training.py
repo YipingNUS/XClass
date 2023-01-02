@@ -37,7 +37,7 @@ def write_to_dir(text, labels, dataset_name, suffix_name):
              os.path.join(DATA_FOLDER_PATH, new_dataset_name, "classes.txt"))
 
 
-def main(dataset_name, suffix, confidence_threshold):
+def main(dataset_name, suffix, confidence_threshold, agreement=False):
     data_dir = os.path.join(INTERMEDIATE_DATA_FOLDER_PATH, dataset_name)
 
     cleaned_text = load_clean_text(os.path.join(DATA_FOLDER_PATH, dataset_name))
@@ -47,11 +47,14 @@ def main(dataset_name, suffix, confidence_threshold):
     with open(os.path.join(data_dir, f"data.{suffix}.pk"), "rb") as f:
         save_data = pickle.load(f)
         documents_to_class = save_data["documents_to_class"]
+        rep_predictions = save_data["repr_prediction"]
         distance = save_data["distance"]
         num_classes = distance.shape[1]
+        import pdb;pdb.set_trace();
     pseudo_document_class_with_confidence = [[] for _ in range(num_classes)]
     for i in range(documents_to_class.shape[0]):
-        pseudo_document_class_with_confidence[documents_to_class[i]].append((distance[i][documents_to_class[i]], i))
+        if not agreement or documents_to_class[i] == rep_predictions[i]:
+            pseudo_document_class_with_confidence[documents_to_class[i]].append((distance[i][documents_to_class[i]], i))
 
     selected = []
     ###
@@ -80,7 +83,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("--dataset_name", type=str)
     parser.add_argument("--suffix", type=str, default="pca64.clusgmm.bbu-12.mixture-100.42")
-    parser.add_argument("--confidence_threshold", default=0.5)
+    parser.add_argument("--confidence_threshold", type=float, default=0.5)
     args = parser.parse_args()
     print(vars(args))
     main(args.dataset_name, args.suffix, args.confidence_threshold)

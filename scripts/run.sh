@@ -20,12 +20,12 @@ echo "EXECUTING: evaluate.py --stage Align --suffix pca64.clusgmm.bbu-12.mixture
 python3 evaluate.py --dataset ${dataset} --stage Align --suffix pca64.clusgmm.bbu-12.mixture-100.42
 
 echo "EXECUTING: prepare_text_classifer_training.py"
-python3 prepare_text_classifer_training.py --dataset_name ${dataset} --suffix pca64.clusgmm.bbu-12.mixture-100.42
+python3 prepare_text_classifer_training.py --dataset_name ${dataset} --suffix pca64.clusgmm.bbu-12.mixture-100.42 --confidence_threshold 0.5
 
 echo "EXECUTING: run_train_text_classifier.sh"
-./run_train_text_classifier.sh ${gpu} ${dataset} pca64.clusgmm.bbu-12.mixture-100.42.0.5
+./run_train_text_classifier.sh ${gpu} ${dataset} pca64.clusgmm.bbu-12.mixture-100.42.0.8
 
-python3 prepare_text_classifer_training_final.py --dataset_name ${dataset} --suffix pca64.clusgmm.bbu-12.mixture-100.42
+#python3 prepare_text_classifer_training_final.py --dataset_name ${dataset} --suffix pca64.clusgmm.bbu-12.mixture-100.42
 
 #echo "EXECUTING: evaluate.py --stage Rep --suffix bbu-12-mixture-100"
 #python3 evaluate.py --dataset ${dataset} --stage Rep --suffix bbu-12-mixture-100
