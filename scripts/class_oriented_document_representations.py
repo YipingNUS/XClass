@@ -211,6 +211,19 @@ def main(args):
         print("")
 
     class_representations = np.array(cls_repr)
+
+    if args.category_repr_dataset_name:
+        rep_folder = os.path.join(INTERMEDIATE_DATA_FOLDER_PATH, args.category_repr_dataset_name)
+        binary_fpath = os.path.join(rep_folder, f"document_repr_lm-{args.lm_type}-{args.layer}-{args.attention_mechanism}-{args.T}.pk")
+        with open(binary_fpath, "rb") as fb:
+            print(f"[WARNING] Overwriting class representation from {binary_fpath}")
+            dictionary = pk.load(fb)
+            class_representations = dictionary["class_representations"]
+            class_words = dictionary["class_words"]
+            print("New class words:")
+            for word_list in class_words:
+                print(" ".join(word_list))
+
     model_class, tokenizer_class, pretrained_weights = MODELS[args.lm_type]
     model = model_class.from_pretrained(pretrained_weights, output_hidden_states=True)
     model.eval()
@@ -240,6 +253,9 @@ def main(args):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("--dataset_name", type=str, required=True)
+    parser.add_argument("--category_repr_dataset_name", default=None, help="provide the dataset name that is used to "
+                                                                           "calculate the category representation if "
+                                                                           "it differs from the training dataset.")
     parser.add_argument("--random_state", type=int, default=42)
     parser.add_argument("--lm_type", type=str, default='bbu')
     parser.add_argument("--layer", type=int, default=12)
